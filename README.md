@@ -1,6 +1,6 @@
 # pokemon_card_dex
 
-A new Flutter project.
+Mi Proyecto en Flutter para mi TFG
 
 ## Getting Started
 
