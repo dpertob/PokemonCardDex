@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:pokemon_card_dex/features/collections/presentation/widgets/collection_card.dart';
-import '../../../../core/injection_container.dart';
-import '../../../cards/presentation/pages/cards_page.dart';
-import '../../../cards/presentation/state/cards_provider.dart';
+import '../../../../core/navigation/app_routes.dart';
 import 'package:provider/provider.dart';
 import '../state/collections_provider.dart';
 
@@ -28,38 +26,41 @@ class _CollectionsPageState extends State<CollectionsPage> {
 
   @override
   Widget build(BuildContext context) {
-    final provider = context.watch<CollectionsProvider>();
+
+    final collections = context.select(
+          (CollectionsProvider p) => p.collections,
+    );
+
+    final isLoading = context.select(
+          (CollectionsProvider p) => p.isLoading,
+    );
+
+    final downloading = context.select(
+          (CollectionsProvider p) => p.downloading,
+    );
+
+
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Colecciones')),
-      body: provider.isLoading
+      appBar: AppBar(title: const Text('Official Sets')),
+      body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
-            itemCount: provider.collections.length,
+            itemCount: collections.length,
             itemBuilder: (context, index) {
-              final collection = provider.collections[index];
+              final collection = collections[index];
 
               return CollectionCard(
+                key: ValueKey(collection.id),
                 collection: collection,
-                isDownloading: provider.downloading.contains(collection.id),
+                isDownloading: downloading.contains(collection.id),
                 onDownload: () async {
-                  await provider.download(collection.id);
+                  await context.read<CollectionsProvider>().download(collection.id);
                 },
                 onOpen: () {
                   Navigator.push(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => ChangeNotifierProvider(
-                        create: (_) => CardsProvider(
-                          setId: collection.id,
-                          getCardsBySet: sl(),
-                          getCollectionOwned: sl(),
-                          getCollectionByApiId: sl(),
-                        )..loadCards(),
-                        child: CardsPage(
-                          collectionId: collection.id,
-                        ),
-                      ),
-                    ),
+                    AppRoutes.cards(collection.id)
                   );
                 },
               );

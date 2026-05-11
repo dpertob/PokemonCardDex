@@ -4,6 +4,7 @@ import 'package:pokemon_card_dex/features/cards/presentation/state/cards_provide
 import 'package:provider/provider.dart';
 
 import '../../../../core/injection_container.dart';
+import '../../../../core/navigation/app_routes.dart';
 import '../../../collection_cards/domain/entities/collection_card_entity.dart';
 import '../../domain/entities/card_entity.dart';
 import '../pages/card_detail_page.dart';
@@ -23,16 +24,7 @@ class PokemonCardTile extends StatelessWidget {
       onTap: () async {
         await Navigator.push(
           context,
-          MaterialPageRoute(
-            builder: (_) => ChangeNotifierProvider(
-              create: (_) => CardDetailProvider(
-                getCollectionCard: sl(),
-                updateCollectionCard: sl(),
-                card: card,
-              )..load(),
-              child: const CardDetailPage(),
-            )
-          ),
+          AppRoutes.cardDetails(card)
         );
 
         context.read<CardsProvider>().loadCards();

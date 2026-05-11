@@ -8,9 +8,7 @@ import '../widgets/card_search_delegate.dart';
 import '../widgets/collection_header.dart';
 
 class CardsPage extends StatefulWidget {
-  final String collectionId;
-
-  const CardsPage({super.key, required this.collectionId});
+  const CardsPage({super.key});
 
   @override
   State<CardsPage> createState() => _CardsPageState();
