@@ -46,6 +46,7 @@ class _CollectionsPageState extends State<CollectionsPage> {
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
           : ListView.builder(
+            key: const PageStorageKey("collections_list"),
             itemCount: collections.length,
             itemBuilder: (context, index) {
               final collection = collections[index];

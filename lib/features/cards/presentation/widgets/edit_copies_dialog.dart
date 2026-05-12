@@ -9,72 +9,36 @@ void showEditCopiesDialog(BuildContext context, int current) {
 
   final provider = context.read<CardDetailProvider>();
 
-  int value = current;
-
   showDialog(
     context: context,
     builder: (context) {
-      return StatefulBuilder(
-        builder: (context, setState) {
-          void update(int newValue) {
-            value = newValue;
-            controller.text = value.toString();
-          }
+      return AlertDialog(
+        title: const Text("Edit card amount"),
+        content: TextField(
+          controller: controller,
+          autofocus: true,
+          textAlign: TextAlign.center,
+          keyboardType: TextInputType.number,
+          inputFormatters: [
+            FilteringTextInputFormatter.digitsOnly,
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Cancel"),
+          ),
+          ElevatedButton(
+            onPressed: () async {
+              final value = int.tryParse(controller.text) ?? 0;
 
-          return AlertDialog(
-            title: const Text("Edit card amount"),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    IconButton(
-                      onPressed: value > 0
-                          ? () => setState(() => update(value - 1))
-                          : null,
-                      icon: const Icon(Icons.remove),
-                    ),
-                    SizedBox(
-                      width: 60,
-                      child: TextField(
-                        controller: controller,
-                        textAlign: TextAlign.center,
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        onChanged: (text) {
-                          final parsed = int.tryParse(text);
-                          if (parsed != null) {
-                            value = parsed;
-                          }
-                        },
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () => setState(() => update(value + 1)),
-                      icon: const Icon(Icons.add),
-                    ),
-                  ],
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text("Cancel"),
-              ),
-              ElevatedButton(
-                onPressed: () async {
-                  await provider.updateCopies(value);
-                  Navigator.pop(context);
-                },
-                child: const Text("Save"),
-              ),
-            ],
-          );
-        },
+              await provider.updateCopies(value);
+
+              Navigator.pop(context);
+            },
+            child: const Text("Save"),
+          ),
+        ],
       );
     },
   );

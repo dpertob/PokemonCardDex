@@ -1,4 +1,6 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import '../../../../core/network/image_cache_manager.dart';
 import '../state/cards_provider.dart';
 
 class CollectionHeader extends StatelessWidget {
@@ -21,10 +23,32 @@ class CollectionHeader extends StatelessWidget {
       child: Column(
         children: [
 
-          Image.network(
-            provider.collection!.logoUrl,
-            width: 180,
-            height: 180,
+          SizedBox(
+            height: 120,
+            child: CachedNetworkImage(
+              imageUrl: provider.collection?.logoUrl ?? "",
+              fit: BoxFit.contain,
+              cacheManager: ImageCacheManager.instance,
+
+              placeholder: (context, url) => const Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+
+              errorWidget: (context, url, error) {
+                return Center(
+                  child: Text(
+                    provider.collection?.name ?? '',
+                    textAlign: TextAlign.center,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                );
+              },
+            ),
           ),
 
           const SizedBox(height: 12),

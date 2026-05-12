@@ -32,14 +32,25 @@ class CollectionsProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// ⬇️ Descargar colección
   Future<void> download(String collectionId) async {
-    downloading.add(collectionId);
+    downloading = {...downloading, collectionId};
     notifyListeners();
 
-    await downloadCollection(collectionId);
+    try{
+      await downloadCollection(collectionId);
 
-    downloading.remove(collectionId);
-    await loadCollections();
+      final index = collections.indexWhere((c) => c.id == collectionId);
+
+      if (index != -1) {
+        final updated = collections[index].copyWith(isDownloaded: true);
+
+        collections[index] = updated;
+      }
+    } catch (e) {
+      debugPrint("Error downloading collection: $e");
+    } finally {
+      downloading = {...downloading}..remove(collectionId);
+      notifyListeners();
+    }
   }
 }

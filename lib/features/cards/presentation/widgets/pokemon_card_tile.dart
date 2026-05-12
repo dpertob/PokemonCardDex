@@ -1,17 +1,16 @@
-import 'package:flutter/cupertino.dart';
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:pokemon_card_dex/features/cards/presentation/state/cards_provider.dart';
 import 'package:provider/provider.dart';
 
-import '../../../../core/injection_container.dart';
 import '../../../../core/navigation/app_routes.dart';
-import '../../../collection_cards/domain/entities/collection_card_entity.dart';
+import '../../../../core/network/image_cache_manager.dart';
 import '../../domain/entities/card_entity.dart';
-import '../pages/card_detail_page.dart';
-import '../state/card_detail_provider.dart';
+
 
 class PokemonCardTile extends StatelessWidget {
   final CardEntity card;
+
 
   const PokemonCardTile({
     super.key,
@@ -20,8 +19,10 @@ class PokemonCardTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+
     return InkWell(
       onTap: () async {
+
         await Navigator.push(
           context,
           AppRoutes.cardDetails(card)
@@ -39,18 +40,19 @@ class PokemonCardTile extends StatelessWidget {
         child: Column(
           children: [
             Expanded(
-              child: Image.network(
-                card.imageSmall ?? "",
+              child: CachedNetworkImage(
+                imageUrl: card.imageSmall ?? "",
+                cacheManager: ImageCacheManager.instance,
                 fit: BoxFit.cover,
                 width: double.infinity,
-                loadingBuilder: (context, child, loadingProgress) {
-                  if (loadingProgress == null) return child;
 
+                placeholder: (context, url) {
                   return const Center(
                     child: CircularProgressIndicator(strokeWidth: 2),
                   );
                 },
-                errorBuilder: (context, error, stackTrace) {
+
+                errorWidget: (context, url, error) {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.all(8),

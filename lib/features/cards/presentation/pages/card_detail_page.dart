@@ -1,8 +1,7 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:isar/isar.dart';
-import 'package:pokemon_card_dex/features/collection_cards/domain/entities/collection_card_entity.dart';
 import 'package:provider/provider.dart';
-import '../../domain/entities/card_entity.dart';
+import '../../../../core/network/image_cache_manager.dart';
 import '../state/card_detail_provider.dart';
 import '../widgets/edit_copies_dialog.dart';
 
@@ -33,9 +32,47 @@ class CardDetailPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Image.network(
-              provider.card.imageLarge ?? provider.card.imageSmall ?? "",
+            CachedNetworkImage(
+              imageUrl: provider.card.imageLarge ?? provider.card.imageSmall ?? "",
               fit: BoxFit.contain,
+              cacheManager: ImageCacheManager.instance,
+              width: double.infinity,
+
+              placeholder: (context, url) => const Padding(
+                padding: EdgeInsets.all(32),
+                child: Center(
+                  child: CircularProgressIndicator(),
+                ),
+              ),
+
+              errorWidget: (context, url, error) {
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(8),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          provider.card.name,
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          provider.card.code ?? "no code found",
+                          textAlign: TextAlign.center,
+                          style: const TextStyle(
+                            fontSize: 12,
+                            color: Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
             ),
 
             const SizedBox(height: 16),
@@ -76,19 +113,38 @@ class CardDetailPage extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(
-                        "Copies: $ownedCopies",
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
+                      IconButton(
+                        onPressed: ownedCopies > 0
+                            ? () {
+                              context
+                                .read<CardDetailProvider>()
+                                .updateCopies(ownedCopies - 1);
+                              }
+                            : null,
+                        icon: const Icon(Icons.remove),
                       ),
-                      ElevatedButton(
-                        onPressed: () {
+
+                      GestureDetector(
+                        onTap: () {
                           showEditCopiesDialog(context, ownedCopies);
                         },
-                        child: const Text("Edit")
-                      )
+                        child: Text(
+                          "Copies: $ownedCopies",
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ),
+
+                      IconButton(
+                        onPressed: () {
+                          context
+                              .read<CardDetailProvider>()
+                              .updateCopies(ownedCopies + 1);
+                        },
+                        icon: const Icon(Icons.add),
+                      ),
                     ]
                   )
 

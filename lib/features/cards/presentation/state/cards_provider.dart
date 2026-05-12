@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/foundation.dart';
-import 'package:pokemon_card_dex/features/collection_cards/domain/usecases/get_collection_card.dart';
 import '../../../collection_cards/domain/usecases/get_collection_owned.dart';
 import '../../../collections/domain/entities/collection_entity.dart';
 import '../../../collections/domain/usecases/get_collection_by_api_id.dart';
@@ -21,6 +20,9 @@ class CardsProvider extends ChangeNotifier {
   });
 
   List<CardEntity> cards = [];
+
+  String query = '';
+
   CollectionEntity? collection;
   int owned = 0;
   int total = 0;
@@ -28,6 +30,22 @@ class CardsProvider extends ChangeNotifier {
 
   bool isLoading = false;
   bool hasError = false;
+
+
+  List<CardEntity> get filteredCards {
+    if (query.isEmpty) return cards;
+
+    return cards.where((card) {
+      return card.name
+          .toLowerCase()
+          .contains(query.toLowerCase());
+    }).toList();
+  }
+
+  void updateQuery(String value) {
+    query = value;
+    notifyListeners();
+  }
 
   Future<void> loadCards() async {
     isLoading = true;

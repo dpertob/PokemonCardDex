@@ -1,6 +1,8 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
+import '../../../../core/network/image_cache_manager.dart';
 import '../../../cards/presentation/pages/cards_page.dart';
 import '../../domain/entities/collection_entity.dart';
 
@@ -28,11 +30,18 @@ class CollectionCard extends StatelessWidget{
         child: Row(
           children: [
 
-
-            Image.network(
-              collection.symbolUrl,
-              width: 40,
-              height: 40,
+            SizedBox(
+              width: 30,
+              height: 30,
+              child: CachedNetworkImage(
+                imageUrl: collection.symbolUrl,
+                fit: BoxFit.contain,
+                cacheManager: ImageCacheManager.instance,
+                placeholder: (context, url) => const Center(
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                ),
+                errorWidget: (context, url, error) => const Icon(Icons.style),
+              ),
             ),
 
             const SizedBox(width: 12),
@@ -49,10 +58,17 @@ class CollectionCard extends StatelessWidget{
             ),
 
             if (isDownloading)
-              const SizedBox(
-                width: 24,
-                height: 24,
-                child: CircularProgressIndicator(strokeWidth: 2),
+              const Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                  SizedBox(width: 8),
+                  Text("Descargando..."),
+                ],
               )
 
               else if (collection.isDownloaded)
