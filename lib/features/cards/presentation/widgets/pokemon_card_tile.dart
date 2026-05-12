@@ -10,26 +10,20 @@ import '../../domain/entities/card_entity.dart';
 
 class PokemonCardTile extends StatelessWidget {
   final CardEntity card;
+  final VoidCallback? onTap;
 
 
   const PokemonCardTile({
     super.key,
     required this.card,
+    this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
 
     return InkWell(
-      onTap: () async {
-
-        await Navigator.push(
-          context,
-          AppRoutes.cardDetails(card)
-        );
-
-        context.read<CardsProvider>().loadCards();
-      },
+      onTap: onTap,
 
       child: Card(
         elevation: 2,

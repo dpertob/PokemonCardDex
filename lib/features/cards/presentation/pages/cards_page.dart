@@ -1,11 +1,9 @@
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:pokemon_card_dex/features/cards/presentation/state/cards_provider.dart';
 import 'package:pokemon_card_dex/features/cards/presentation/widgets/pokemon_card_tile.dart';
 
 import 'package:provider/provider.dart';
-import '../../../../core/network/image_cache_manager.dart';
-import '../widgets/card_search_delegate.dart';
+import '../../../../core/navigation/app_routes.dart';
 import '../widgets/collection_header.dart';
 
 class CardsPage extends StatefulWidget {
@@ -37,7 +35,6 @@ class _CardsPageState extends State<CardsPage> {
   @override
   Widget build(BuildContext context) {
     final provider = context.watch<CardsProvider>();
-
     final filtered = provider.filteredCards;
 
     if (provider.hasError) {
@@ -93,15 +90,21 @@ class _CardsPageState extends State<CardsPage> {
           ],
         ),
       ),
+
+
       body: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () {
           FocusScope.of(context).unfocus();
         },
+
+
         child: provider.isLoading
             ? const Center(child: CircularProgressIndicator())
             : CustomScrollView(
+          key: const PageStorageKey('cards_scroll'),
           slivers: [
+
             SliverToBoxAdapter(
               child: CollectionHeader(provider: provider),
             ),
@@ -113,8 +116,25 @@ class _CardsPageState extends State<CardsPage> {
             SliverGrid(
               delegate: SliverChildBuilderDelegate(
                     (context, index) {
+
                   final card = filtered[index];
-                  return PokemonCardTile(card: card);
+
+                  return PokemonCardTile(
+                    card: card,
+                    onTap: () {
+                      final provider = context.read<CardsProvider>();
+
+                      final index = provider.filteredCards.indexOf(card);
+
+                      Navigator.push(
+                        context,
+                        AppRoutes.cardDetailsPager(
+                          cards: filtered,
+                          initialIndex: index,
+                        ),
+                      );
+                    },
+                  );
                 },
                 childCount: filtered.length,
               ),

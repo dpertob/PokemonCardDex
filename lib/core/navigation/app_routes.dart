@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 
 import '../../features/cards/domain/entities/card_entity.dart';
 import '../../features/cards/presentation/pages/card_detail_page.dart';
+import '../../features/cards/presentation/pages/card_detail_pager.dart';
 import '../../features/cards/presentation/pages/cards_page.dart';
 import '../../features/cards/presentation/state/card_detail_provider.dart';
 import '../../features/cards/presentation/state/cards_provider.dart';
@@ -32,22 +33,23 @@ class AppRoutes {
           getCardsBySet: sl(),
           getCollectionOwned: sl(),
           getCollectionByApiId: sl(),
+          updateCollectionCard: sl(),
         )..loadCards(),
         child: CardsPage(),
       ),
     );
   }
 
-  static Route cardDetails(CardEntity card) {
+
+  static Route cardDetailsPager({
+    required List<CardEntity> cards,
+    required int initialIndex,
+  }) {
     return MaterialPageRoute(
-        builder: (_) => ChangeNotifierProvider(
-          create: (_) => CardDetailProvider(
-            getCollectionCard: sl(),
-            updateCollectionCard: sl(),
-            card: card,
-          )..load(),
-          child: const CardDetailPage(),
-        ),
+      builder: (_) => CardDetailPager(
+        cards: cards,
+        initialIndex: initialIndex,
+      ),
     );
   }
 }

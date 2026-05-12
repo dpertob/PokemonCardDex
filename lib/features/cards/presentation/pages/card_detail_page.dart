@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../../core/network/image_cache_manager.dart';
 import '../state/card_detail_provider.dart';
+import '../state/cards_provider.dart';
 import '../widgets/edit_copies_dialog.dart';
 
 class CardDetailPage extends StatelessWidget {
@@ -14,7 +15,10 @@ class CardDetailPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
 
-    final provider = context.watch<CardDetailProvider>();
+    final provider = context.watch<CardsProvider>();
+    final card = provider.currentCard;
+    final ownedCopies = provider.getOwnedCopies(card.id);
+
 
     if (provider.isLoading) {
       return const Scaffold(
@@ -22,57 +26,67 @@ class CardDetailPage extends StatelessWidget {
       );
     }
 
-    final ownedCopies = provider.collectionCard?.ownedCopies ?? 0;
 
     return Scaffold(
       appBar: AppBar(
-        title: Text(provider.card.name),
+        title: Text(card.name),
       ),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            CachedNetworkImage(
-              imageUrl: provider.card.imageLarge ?? provider.card.imageSmall ?? "",
-              fit: BoxFit.contain,
-              cacheManager: ImageCacheManager.instance,
-              width: double.infinity,
+            AspectRatio(
+              aspectRatio: 0.72,
 
-              placeholder: (context, url) => const Padding(
-                padding: EdgeInsets.all(32),
-                child: Center(
-                  child: CircularProgressIndicator(),
-                ),
-              ),
+              child: CachedNetworkImage(
+                imageUrl:
+                card.imageLarge ??
+                card.imageSmall ??
+                    "",
 
-              errorWidget: (context, url, error) {
-                return Center(
-                  child: Padding(
-                    padding: const EdgeInsets.all(8),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          provider.card.name,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
+                fit: BoxFit.contain,
+
+                cacheManager: ImageCacheManager.instance,
+
+                width: double.infinity,
+
+                placeholder: (context, url) {
+                  return const Center(
+                    child: CircularProgressIndicator(),
+                  );
+                },
+
+                errorWidget: (context, url, error) {
+                  return Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(8),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            card.name,
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          provider.card.code ?? "no code found",
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(
-                            fontSize: 12,
-                            color: Colors.grey,
+
+                          SizedBox(height: 4),
+
+                          Text(
+                            card.code ?? "no code found",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.grey,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
-                  ),
-                );
-              }
+                  );
+                },
+              ),
             ),
 
             const SizedBox(height: 16),
@@ -83,7 +97,7 @@ class CardDetailPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    provider.card.name,
+                    card.name,
                     style: const TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.bold,
@@ -92,17 +106,17 @@ class CardDetailPage extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  Text("Código: ${provider.card.code ?? "N/A"}"),
-                  Text("Rareza: ${provider.card.rarity ?? "Desconocida"}"),
-                  Text("HP: ${provider.card.hp ?? "-"}"),
-                  Text("Tipos: ${provider.card.types?.join(', ')}"),
-                  Text("Subtipos: ${provider.card.subtypes?.join(', ')}"),
+                  Text("Código: ${card.code ?? "N/A"}"),
+                  Text("Rareza: ${card.rarity ?? "Desconocida"}"),
+                  Text("HP: ${card.hp ?? "-"}"),
+                  Text("Tipos: ${card.types?.join(', ')}"),
+                  Text("Subtipos: ${card.subtypes?.join(', ')}"),
 
                   const SizedBox(height: 16),
 
-                  if (provider.card.flavorText != null)
+                  if (card.flavorText != null)
                     Text(
-                      provider.card.flavorText!,
+                      card.flavorText!,
                       style: const TextStyle(
                         fontStyle: FontStyle.italic,
                       ),
@@ -116,9 +130,7 @@ class CardDetailPage extends StatelessWidget {
                       IconButton(
                         onPressed: ownedCopies > 0
                             ? () {
-                              context
-                                .read<CardDetailProvider>()
-                                .updateCopies(ownedCopies - 1);
+                              context.read<CardsProvider>().updateCopies(card.id, ownedCopies - 1);
                               }
                             : null,
                         icon: const Icon(Icons.remove),
